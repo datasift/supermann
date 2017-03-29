@@ -130,8 +130,11 @@ class Supermann(object):
         for data in self.supervisor.rpc.getAllProcessInfo():
             pid = data.pop('pid')
             cache[pid] = self._get_process(pid)
+            full_name = data['name']
+            if data['group_name']:
+                data['full_name'] = data['group'] + ':' + data['name']
             self.log.debug("Emitting signal for process {0}({1})".format(
-                data['name'], pid))
+                data['full_name'], pid))
             supermann.signals.process.send(self, process=cache[pid], data=data)
 
         # The cache is stored for use in _get_process and the next call

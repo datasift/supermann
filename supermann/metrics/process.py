@@ -16,7 +16,7 @@ def running_process(function):
         if process is None:
             log = supermann.utils.getLogger(function)
             log.debug("Process '{0}' does not exist (state: {1})".format(
-                data['name'], data['statename']))
+                data['full_name'], data['statename']))
         else:
             return function(sender, process, data)
     return wrapper
@@ -39,14 +39,14 @@ def get_nofile_limit(pid):
 def cpu(sender, process, data):
     """CPU utilisation as a percentage and total CPU time in seconds
 
-    - ``process:{name}:cpu:percent``
-    - ``process:{name}:cpu:absolute``
+    - ``process:{full_name}:cpu:percent``
+    - ``process:{full_name}:cpu:absolute``
     """
     sender.riemann.event(
-        service='process:{name}:cpu:percent'.format(**data),
+        service='process:{full_name}:cpu:percent'.format(**data),
         metric_f=process.cpu_percent(interval=None))
     sender.riemann.event(
-        service='process:{name}:cpu:absolute'.format(**data),
+        service='process:{full_name}:cpu:absolute'.format(**data),
         metric_f=sum(process.cpu_times()))
 
 
@@ -54,19 +54,19 @@ def cpu(sender, process, data):
 def mem(sender, process, data):
     """Total virtual memory, total RSS memory, RSS utilisation as percentage
 
-    - ``process:{name}:mem:virt:absolute``
-    - ``process:{name}:mem:rss:absolute``
-    - ``process:{name}:mem:rss:percent``
+    - ``process:{full_name}:mem:virt:absolute``
+    - ``process:{full_name}:mem:rss:absolute``
+    - ``process:{full_name}:mem:rss:percent``
     """
     memory_info = process.memory_info()
     sender.riemann.event(
-        service='process:{name}:mem:virt:absolute'.format(name=data['name']),
+        service='process:{full_name}:mem:virt:absolute'.format(name=data['name']),
         metric_f=memory_info.vms)
     sender.riemann.event(
-        service='process:{name}:mem:rss:absolute'.format(name=data['name']),
+        service='process:{full_name}:mem:rss:absolute'.format(name=data['name']),
         metric_f=memory_info.rss)
     sender.riemann.event(
-        service='process:{name}:mem:rss:percent'.format(name=data['name']),
+        service='process:{full_name}:mem:rss:percent'.format(name=data['name']),
         metric_f=process.memory_percent())
 
 
@@ -74,15 +74,15 @@ def mem(sender, process, data):
 def fds(sender, process, data):
     """Number of file descriptors a process is using it's hard limit
 
-    - ``process:{name}:fds:absolute``
-    - ``process:{name}:fds:percent``
+    - ``process:{full_name}:fds:absolute``
+    - ``process:{full_name}:fds:percent``
     """
     num_fds = process.num_fds()
     sender.riemann.event(
-        service='process:{name}:fds:absolute'.format(**data),
+        service='process:{full_name}:fds:absolute'.format(**data),
         metric_f=num_fds)
     sender.riemann.event(
-        service='process:{name}:fds:percent'.format(**data),
+        service='process:{full_name}:fds:percent'.format(**data),
         metric_f=(num_fds / get_nofile_limit(process.pid)) * 100)
 
 
@@ -94,8 +94,8 @@ def io(sender, process, data):
     inside an unprivileged Docker container), the events will have set
     ``metric_f`` to 0 and ``state`` to ``access denied``.
 
-    - ``process:{name}:io:read:bytes``
-    - ``process:{name}:io:write:bytes``
+    - ``process:{full_name}:io:read:bytes``
+    - ``process:{full_name}:io:write:bytes``
     """
     try:
         io_counters = process.io_counters()
@@ -106,26 +106,26 @@ def io(sender, process, data):
         write_bytes = dict(metric_f=io_counters.write_bytes)
 
     sender.riemann.event(
-        service='process:{name}:io:read:bytes'.format(**data), **read_bytes)
+        service='process:{full_name}:io:read:bytes'.format(**data), **read_bytes)
     sender.riemann.event(
-        service='process:{name}:io:write:bytes'.format(**data), **write_bytes)
+        service='process:{full_name}:io:write:bytes'.format(**data), **write_bytes)
 
 
 def state(sender, process, data):
     """The process state that Supervisor reports
 
-    - ``process:{name}:state``
+    - ``process:{full_name}:state``
     """
     sender.riemann.event(
-        service='process:{name}:state'.format(**data),
+        service='process:{full_name}:state'.format(**data),
         state=data['statename'].lower())
 
 
 def uptime(sender, process, data):
     """The time in seconds Supervisor reports the process has been running
 
-    - ``process:{name}:uptime``
+    - ``process:{full_name}:uptime``
     """
     sender.riemann.event(
-        service='process:{name}:uptime'.format(**data),
+        service='process:{full_name}:uptime'.format(**data),
         metric_f=data['stop' if process is None else 'now'] - data['start'])
