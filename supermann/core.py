@@ -130,7 +130,7 @@ class Supermann(object):
         for data in self.supervisor.rpc.getAllProcessInfo():
             pid = data.pop('pid')
             cache[pid] = self._get_process(pid)
-            full_name = data['name']
+            data['full_name'] = data['name']
             if data['group'] != data['name']:
                 data['full_name'] = data['group'] + ':' + data['name']
             self.log.debug("Emitting signal for process {0}({1})".format(
