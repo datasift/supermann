@@ -131,7 +131,7 @@ class Supermann(object):
             pid = data.pop('pid')
             cache[pid] = self._get_process(pid)
             full_name = data['name']
-            if data['group_name']:
+            if data['group']:
                 data['full_name'] = data['group'] + ':' + data['name']
             self.log.debug("Emitting signal for process {0}({1})".format(
                 data['full_name'], pid))
