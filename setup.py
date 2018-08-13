@@ -22,8 +22,9 @@ setuptools.setup(
         'blinker>=1.1',
         'click>=6.6',
         'psutil>=4.3.0',
-        'riemann-client>=6.3.0',
-        'supervisor>=3.0,<4.0'
+        'riemann-client>=6.3.0,<6.4.0',
+        'supervisor>=3.0,<4.0',
+        'protobuf>=2.3.0,<2.6.0'
     ],
 
     entry_points = {
